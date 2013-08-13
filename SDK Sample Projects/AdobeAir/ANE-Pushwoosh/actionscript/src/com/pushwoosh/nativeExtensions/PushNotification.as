@@ -90,19 +90,19 @@ package com.pushwoosh.nativeExtensions
 			}
 		}
 
-		public function setIntTag(value:int):void
+		public function setIntTag(name:String, value:int):void
 		{
 			if (this.isPushNotificationSupported)
 			{
-				extCtx.call("setIntTag", value);
+				extCtx.call("setIntTag", name, value);
 			}
 		}
 
-		public function setStringTag(value:String):void
+		public function setStringTag(name:String, value:String):void
 		{
 			if (this.isPushNotificationSupported)
 			{
-				extCtx.call("setStringTag", value);
+				extCtx.call("setStringTag", name, value);
 			}
 		}
 
