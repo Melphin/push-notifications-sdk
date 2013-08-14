@@ -70,6 +70,8 @@ DEFINE_ANE_FUNCTION(registerPush)
 		free(g_pushMessageStr); g_pushMessageStr = 0;
 	}
 	
+	[[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+	
 	return nil;
 }
 
@@ -313,8 +315,6 @@ BOOL dynamicDidFinishLaunching(id self, SEL _cmd, id application, id launchOptio
 		[self applicationDidFinishLaunching:application];
 		result = YES;
 	}
-	
-	[[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
 	
 	if(![PushNotificationManager pushManager].delegate) {
 		[PushNotificationManager pushManager].delegate = (NSObject<PushNotificationDelegate> *)[UIApplication sharedApplication];
