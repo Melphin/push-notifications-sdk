@@ -449,6 +449,15 @@ static PushNotificationManager * instance = nil;
 	[[UIApplication sharedApplication] openURL:[response URL]];
 }
 
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+	NSURL *url = [[error userInfo] objectForKey:@"NSErrorFailingURLKey"];
+	
+	//maybe itms:// or facebook:// url was shortened, try to open it directly
+	if (![[url scheme] hasPrefix:@"http"]) {
+		[[UIApplication sharedApplication] openURL:url];
+	}
+}
+
 #pragma mark -
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if(buttonIndex != 1) {

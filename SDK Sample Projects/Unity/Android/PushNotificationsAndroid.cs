@@ -95,4 +95,15 @@ public class PushNotificationsAndroid : MonoBehaviour {
 		//do handling here
 		Debug.Log(payload);
 	}
+	void OnApplicationPause(bool paused)
+	{
+		if(paused)
+		{
+			pushwoosh.Call("onPause");
+		}
+		else
+		{
+			pushwoosh.Call("onResume");
+		}
+	}
 }
