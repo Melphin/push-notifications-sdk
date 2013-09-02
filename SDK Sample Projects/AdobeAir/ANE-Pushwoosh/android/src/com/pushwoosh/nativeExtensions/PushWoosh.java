@@ -77,7 +77,16 @@ class PushWoosh
             ai = activity.getPackageManager().getApplicationInfo(activity.getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
             String pwAppid = ai.metaData.getString("PW_APPID");
             System.out.println("App ID: " + pwAppid);
-            String projectId = ai.metaData.getString("PW_PROJECT_ID").substring(1);
+            String projectId = "";
+
+            try {
+            	projectId = ai.metaData.getString("PW_PROJECT_ID").substring(1);
+            }
+            catch(Exception e)
+            {
+            	projectId = "";
+            }
+
             System.out.println("Project ID: " + projectId);
 			
 			broadcastPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH");
