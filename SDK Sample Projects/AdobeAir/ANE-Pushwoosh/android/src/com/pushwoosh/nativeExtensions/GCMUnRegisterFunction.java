@@ -36,11 +36,6 @@ public class GCMUnRegisterFunction implements FREFunction {
 
 	public FREObject call(FREContext context, FREObject[] args) 
 	{
-		if(Build.MANUFACTURER.equals("Amazon")) {
-			Log.d(TAG, "push notifications disabled on amazon devices, ignoring unregister");
-			return null;
-		}
-		
 		PushWoosh.getInstance().PushWooshNotificationUnRegister(context.getActivity());
 		return null;
 	}

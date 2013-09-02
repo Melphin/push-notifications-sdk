@@ -8,16 +8,17 @@
 
 package com.arellomobile.android.push;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Context;
 import android.util.Log;
+
 import com.arellomobile.android.push.request.RequestHelper;
 import com.arellomobile.android.push.utils.NetworkUtils;
 import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.google.android.gcm.GCMRegistrar;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Register/unregister with the App server.

@@ -8,15 +8,15 @@
 
 package com.arellomobile.android.push.utils;
 
-import com.arellomobile.android.push.preference.SoundType;
-import com.arellomobile.android.push.preference.VibrateType;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.arellomobile.android.push.preference.SoundType;
+import com.arellomobile.android.push.preference.VibrateType;
+
 public class PreferenceUtils
 {
-	private static final String PREFERENCE = "com.google.android.c2dm";
+	private static final String PREFERENCE = "com.pushwoosh.pushnotifications";
 
 	private static final String LAST_REGISTRATION = "last_registration_change";
 

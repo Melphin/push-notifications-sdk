@@ -36,11 +36,6 @@ public class GCMRegisterFunction implements FREFunction {
 
 	public FREObject call(FREContext context, FREObject[] args) 
 	{
-		if(Build.MANUFACTURER.equals("Amazon")) {
-			Log.d(TAG, "push notifications disabled on amzon devices, ignoring register");
-			return null;
-		}
-		
 		PushWoosh.getInstance().PushWooshNotificationRegister(context.getActivity());
 		return null;
 	}

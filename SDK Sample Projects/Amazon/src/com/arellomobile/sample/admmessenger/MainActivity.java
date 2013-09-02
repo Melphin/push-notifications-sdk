@@ -43,7 +43,7 @@ public class MainActivity extends Activity
 	    registerReceivers();
 
 	    //Create and start push manager
-	    PushManager pushManager = new PushManager(this, "82BB2-64A12");
+	    PushManager pushManager = new PushManager(this, "4F0C807E51EC77.93591449", "");
 	    pushManager.onStartup(this);
 
 	    PushManager.setSimpleNotificationMode(this);

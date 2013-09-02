@@ -11,9 +11,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+
 import com.arellomobile.android.push.data.PushZoneLocation;
-import com.arellomobile.android.push.utils.executor.ExecutorHelper;
 import com.arellomobile.android.push.utils.WorkerTask;
+import com.arellomobile.android.push.utils.executor.ExecutorHelper;
 import com.google.android.gcm.GCMRegistrar;
 
 /**
