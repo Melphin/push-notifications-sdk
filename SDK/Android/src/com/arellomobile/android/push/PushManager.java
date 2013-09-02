@@ -8,6 +8,12 @@
 
 package com.arellomobile.android.push;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,11 +22,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
+import com.arellomobile.android.push.registrar.PushRegistrar;
+import com.arellomobile.android.push.registrar.PushRegistrarADM;
+import com.arellomobile.android.push.registrar.PushRegistrarGCM;
 import com.arellomobile.android.push.tags.SendPushTagsAsyncTask;
 import com.arellomobile.android.push.tags.SendPushTagsCallBack;
 import com.arellomobile.android.push.utils.executor.ExecutorHelper;
@@ -32,18 +40,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public class PushManager
 {
-	// app id in the backend
-	private volatile String mAppId;
-	volatile static String mSenderId;
-
 	private static final String HTML_URL_FORMAT = "https://cp.pushwoosh.com/content/%s";
 
 	public static final String REGISTER_EVENT = "REGISTER_EVENT";
@@ -56,6 +54,9 @@ public class PushManager
 
 	private Context mContext;
 	private Bundle mLastBundle;
+	
+	PushRegistrar pushRegistrar;
+	boolean forceRegister = false;
 
 	Context getContext() {
 		return mContext;
@@ -68,17 +69,29 @@ public class PushManager
 	{
 		GeneralUtils.checkNotNull(context, "context");
 		mContext = context;
-		mAppId = PreferenceUtils.getApplicationId(context);
-		mSenderId = PreferenceUtils.getSenderId(context);
+		
+		if(GeneralUtils.isAmazonDevice())
+		{
+			pushRegistrar = new PushRegistrarADM(context);
+		}
+		else
+		{
+			pushRegistrar = new PushRegistrarGCM(context);
+		}
 	}
 
 	public PushManager(Context context, String appId, String senderId)
 	{
 		this(context);
 
-		mAppId = appId;
-		mSenderId = senderId;
-		PreferenceUtils.setApplicationId(context, mAppId);
+		//check if App ID has been changed
+		String oldAppId = PreferenceUtils.getApplicationId(context);
+		if (!oldAppId.equals(appId))
+		{
+			forceRegister = true;
+		}
+
+		PreferenceUtils.setApplicationId(context, appId);
 		PreferenceUtils.setSenderId(context, senderId);
 	}
 	
@@ -92,14 +105,8 @@ public class PushManager
 	 */
 	public void onStartup(Context context, boolean registerAppOpen)
 	{
-		GeneralUtils.checkNotNullOrEmpty(mAppId, "mAppId");
-		GeneralUtils.checkNotNullOrEmpty(mSenderId, "mSenderId");
-
-		// Make sure the device has the proper dependencies.
-		GCMRegistrar.checkDevice(context);
-		// Make sure the manifest was properly set - comment out this line
-		// while developing the app, then uncomment it when it's ready.
-		GCMRegistrar.checkManifest(context);
+		//check for manifest and permissions
+		pushRegistrar.checkDevice(context);
 		
 		if(registerAppOpen)
 			sendAppOpen(context);
@@ -108,7 +115,7 @@ public class PushManager
 		if (regId.equals(""))
 		{
 			// Automatically registers application on startup.
-			GCMRegistrar.register(context, mSenderId);
+			pushRegistrar.registerPW(context);
 		}
 		else
 		{
@@ -121,9 +128,8 @@ public class PushManager
 				}
 			}
 
-			String oldAppId = PreferenceUtils.getApplicationId(context);
-
-			if (!oldAppId.equals(mAppId))
+			//if we need to re-register on Pushwoosh because of Pushwoosh App Id change
+			if (forceRegister)
 			{
 				registerOnPushWoosh(context, regId);
 			}
@@ -155,7 +161,7 @@ public class PushManager
 	{
 		cancelPrevRegisterTask();
 
-		GCMRegistrar.unregister(mContext);
+		pushRegistrar.unregisterPW(mContext);
 	}
 
 	public String getCustomData()

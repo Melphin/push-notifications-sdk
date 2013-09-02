@@ -1,7 +1,6 @@
 package com.arellomobile.android.push;
 
 import com.amazon.device.messaging.ADMMessageReceiver;
-import com.arellomobile.android.push.PushGCMIntentService;
 
 /**
  * The MessageAlertReceiver class listens for messages from ADM and forwards them to the
@@ -17,6 +16,6 @@ public class MessageAlertReceiver extends ADMMessageReceiver
 	/** {@inheritDoc} */
 	public MessageAlertReceiver()
 	{
-		super(PushGCMIntentService.class);
+		super(PushAmazonIntentService.class);
 	}
 }

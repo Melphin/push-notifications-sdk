@@ -7,29 +7,22 @@
 // MIT Licensed
 package com.arellomobile.android.push.request;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+
 import android.content.Context;
 import android.location.Location;
+
 import com.arellomobile.android.push.data.PushZoneLocation;
 import com.arellomobile.android.push.utils.GeneralUtils;
 import com.arellomobile.android.push.utils.PreferenceUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-/**
- * Date: 17.08.12
- * Time: 10:24
- *
- * @author mig35
- */
 public class RequestHelper
 {
 	static public Map<String, Object> getRegistrationUnregistrationData(Context context, String deviceRegistrationID)
@@ -39,7 +32,18 @@ public class RequestHelper
 		data.put("application", PreferenceUtils.getApplicationId(context));
 		data.put("hwid", GeneralUtils.getDeviceUUID(context));
 		data.put("device_name", GeneralUtils.isTablet(context) ? "Tablet" : "Phone");
-		data.put("device_type", "3");
+		
+		//check for Amazon (Kindle) or Google device
+		if(GeneralUtils.isAmazonDevice())
+		{
+			data.put("device_type", "9");
+		}
+		else
+		{
+			//android
+			data.put("device_type", "3");
+		}
+		
 		data.put("language", Locale.getDefault().getLanguage());
 		data.put("timezone", Calendar.getInstance().getTimeZone().getRawOffset() / 1000); // converting from milliseconds to seconds
 

@@ -61,8 +61,8 @@ public class GeneralUtils
 		{
 			// if no
 		}
-		SharedPreferences sharedPreferences =
-				context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_WORLD_WRITEABLE);
+		
+		SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_WORLD_WRITEABLE);
 		// try to get from pref
 		String deviceId = sharedPreferences.getString(SHARED_KEY, null);
 		if (null != deviceId)
@@ -80,8 +80,7 @@ public class GeneralUtils
 
 	public static boolean isTablet(Context context)
 	{
-		// TODO: This hacky stuff goes away when we allow users to target devices
-		int xlargeBit = 4; // Configuration.SCREENLAYOUT_SIZE_XLARGE;  // upgrade to HC SDK to get this
+		int xlargeBit = Configuration.SCREENLAYOUT_SIZE_XLARGE;
 		Configuration config = context.getResources().getConfiguration();
 		return (config.screenLayout & xlargeBit) == xlargeBit;
 	}
@@ -132,5 +131,14 @@ public class GeneralUtils
 		return context.getPackageManager().checkPermission("android.permission.BROADCAST_STICKY", context.getPackageName()) ==
 				PackageManager.PERMISSION_GRANTED;
 	}
-
+	
+	public static boolean isAmazonDevice()
+	{
+		if(android.os.Build.MANUFACTURER.equals("Amazon"))
+		{
+			return true;
+		}
+		
+		return false;
+	}
 }

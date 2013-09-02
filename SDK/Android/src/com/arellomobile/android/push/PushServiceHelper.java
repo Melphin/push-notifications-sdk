@@ -1,14 +1,9 @@
-//
-//  MessageActivity.java
-//
-// Pushwoosh Push Notifications SDK
-// www.pushwoosh.com
-//
-// MIT Licensed
-
 package com.arellomobile.android.push;
 
 import java.util.Set;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -17,86 +12,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 
-import com.amazon.device.messaging.ADMMessageHandlerBase;
-import com.amazon.device.messaging.ADMMessageReceiver;
 import com.arellomobile.android.push.utils.GeneralUtils;
 import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.arellomobile.android.push.utils.notification.BannerNotificationFactory;
 import com.arellomobile.android.push.utils.notification.BaseNotificationFactory;
 import com.arellomobile.android.push.utils.notification.SimpleNotificationFactory;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-public class PushGCMIntentService extends ADMMessageHandlerBase
-{
-	private static final String TAG = "GCMIntentService";
-	private Handler mHandler;
-
-	/**
-	 * The MessageAlertReceiver class listens for messages from ADM and forwards them to the
-	 * SampleADMMessageHandler class.
-	 */
-	public static class MessageAlertReceiver extends ADMMessageReceiver
-	{
-		/** {@inheritDoc} */
-		public MessageAlertReceiver()
-		{
-			super(PushGCMIntentService.class);
-		}
-	}
-
-	/**
-	 * Class constructor.
-	 */
-	public PushGCMIntentService()
-	{
-		super(PushGCMIntentService.class.getName());
-	}
-
-	/**
-	 * Class constructor, including the className argument.
-	 *
-	 * @param className The name of the class.
-	 */
-	public PushGCMIntentService(final String className)
-	{
-		super(className);
-	}
-
-	@Override
-	protected void onRegistered(String registrationId)
-	{
-		Log.i(TAG, "Device registered: regId = " + registrationId);
-		DeviceRegistrar.registerWithServer(getApplicationContext(), registrationId);
-	}
-
-	@Override
-	protected void onUnregistered(String registrationId)
-	{
-		Log.i(TAG, "Device unregistered");
-		DeviceRegistrar.unregisterWithServer(getApplicationContext(), registrationId);
-	}
-
-	@Override
-	protected void onMessage(Intent intent)
-	{
-		Log.i(TAG, "Received message");
-		// notifies user
-		generateNotification(getApplicationContext(), intent, mHandler);
-	}
-
-	@Override
-	protected void onRegistrationError(String errorId)
-	{
-		Log.e(TAG, "Messaging registration error: " + errorId);
-		PushEventsTransmitter.onRegisterError(getApplicationContext(), errorId);
-	}
-
-	private static void generateNotification(Context context, Intent intent, Handler handler)
+public class PushServiceHelper {
+	public static void generateNotification(Context context, Intent intent)
 	{
 		Bundle extras = intent.getExtras();
 		if (extras == null)
@@ -186,7 +110,7 @@ public class PushGCMIntentService extends ADMMessageHandlerBase
 		DeviceFeature2_5.sendMessageDeliveryEvent(context, extras.getString("p"));
 	}
 
-	private static void generateBroadcast(Context context, Bundle extras)
+	public static void generateBroadcast(Context context, Bundle extras)
 	{
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction(context.getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
@@ -221,7 +145,13 @@ public class PushGCMIntentService extends ADMMessageHandlerBase
 
 		broadcastIntent.putExtra(BasePushMessageReceiver.JSON_DATA_KEY, dataObject.toString());
 
-		context.sendBroadcast(broadcastIntent, context.getPackageName() + ".permission.RECEIVE_ADM_MESSAGE");
+		if(GeneralUtils.isAmazonDevice())
+		{
+			context.sendBroadcast(broadcastIntent, context.getPackageName() + ".permission.RECEIVE_ADM_MESSAGE");
+		}
+		else
+		{
+			context.sendBroadcast(broadcastIntent, context.getPackageName() + ".permission.C2D_MESSAGE");
+		}
 	}
 }
-
