@@ -54,7 +54,7 @@
 
         <!--  Application-specific subclass of ADMMessageHandlerBase that will
           handle received messages -->
-        <service android:name="com.arellomobile.android.push.PushGCMIntentService" />
+        <service android:name="com.arellomobile.android.push.PushAmazonIntentService" />
 
         <!-- You must explicitly enable ADM. You must also declare whether your application will run with or without ADM.
         If you specify android:required="false", your app must degrade gracefully when ADM is unavailable. -->

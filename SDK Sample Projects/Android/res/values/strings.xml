@@ -22,5 +22,6 @@
     <string name="unregistered_error">Unregistration error: %s</string>
 
     <string name="on_message">On message: %s</string>
+    <string name="second_activity">Second activity</string>
 
 </resources>

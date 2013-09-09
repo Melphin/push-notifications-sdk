@@ -6,9 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -18,19 +17,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.arellomobile.android.push.BasePushMessageReceiver;
-import com.arellomobile.android.push.DeviceFeature2_5;
 import com.arellomobile.android.push.PushManager;
 import com.arellomobile.android.push.PushManager.GetTagsListener;
 import com.arellomobile.android.push.utils.RegisterBroadcastReceiver;
-import com.arellomobile.android.push.utils.WorkerTask;
-import com.arellomobile.android.push.utils.executor.ExecutorHelper;
-import com.google.android.gcm.GCMRegistrar;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends FragmentActivity implements SendTagsCallBack
 {
 	private static final String SEND_TAGS_STATUS_FRAGMENT_TAG = "send_tags_status_fragment_tag";
 
-	private static final String APP_ID = "4F0C807E51EC77.93591449";
+	private static final String APP_ID = "4FC89B6D14A655.46488481";
 	private static final String SENDER_ID = "60756016005";
 
 	private TextView mTagsStatus;
@@ -277,6 +275,34 @@ public class MainActivity extends FragmentActivity implements SendTagsCallBack
 	public void doOnMessageReceive(String message)
 	{
 		mGeneralStatus.setText(getString(R.string.on_message, message));
+
+		// Parse custom JSON data string.
+		// You can set background color with custom JSON data in the following format: { "r" : "10", "g" : "200", "b" : "100" }
+		// Or open specific screen of the app with custom page ID (set ID in the { "id" : "2" } format)
+		try
+		{
+			JSONObject messageJson = new JSONObject(message);
+			JSONObject customJson = new JSONObject(messageJson.getString("u"));
+
+			if (customJson.has("r") && customJson.has("g") && customJson.has("b"))
+			{
+				int r = customJson.getInt("r");
+				int g = customJson.getInt("g");
+				int b = customJson.getInt("b");
+				View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+				rootView.setBackgroundColor(Color.rgb(r, g, b));
+			}
+			if (customJson.has("id"))
+			{
+				Intent intent = new Intent(this, SecondActivity.class);
+				intent.putExtra(PushManager.PUSH_RECEIVE_EVENT, messageJson.toString());
+				startActivity(intent);
+			}
+		}
+		catch (JSONException e)
+		{
+			// No custom JSON. Pass this exception
+		}
 	}
 
 	/**

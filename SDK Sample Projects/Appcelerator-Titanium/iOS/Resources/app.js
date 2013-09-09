@@ -14,7 +14,7 @@ var tab1 = Titanium.UI.createTab({
 
 Ti.include('pushwoosh.js');
 
-PushWoosh.appCode = 'YOUR_PUSHWOOSH_APP_ID';
+PushWoosh.appCode = 'A6C3E-A0F27';
 
 var register = Ti.UI.createButton({
 	title : 'register',
@@ -55,7 +55,7 @@ register.addEventListener('click', function() {
 			
 			//send stats to Pushwoosh about push opened
 			PushWoosh.sendPushStat(e.data.p);
-			
+		
 			var a = Ti.UI.createAlertDialog({
 				title : 'New Message',
 				message : e.data.alert
@@ -65,7 +65,10 @@ register.addEventListener('click', function() {
 		}
 	});
 	Ti.API.info('registering with PushWoosh');
+	
+	PushWoosh.startLocationTracking('PWTrackAccurateLocationChanges');
 });
+
 win.add(register);
 
 var unregister = Ti.UI.createButton({
