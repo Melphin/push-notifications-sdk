@@ -29,13 +29,12 @@ import com.arellomobile.android.push.preference.VibrateType;
 import com.arellomobile.android.push.registrar.PushRegistrar;
 import com.arellomobile.android.push.registrar.PushRegistrarADM;
 import com.arellomobile.android.push.registrar.PushRegistrarGCM;
-import com.arellomobile.android.push.tags.SendPushTagsAsyncTask;
-import com.arellomobile.android.push.tags.SendPushTagsCallBack;
 import com.arellomobile.android.push.utils.executor.ExecutorHelper;
 import com.arellomobile.android.push.utils.GeneralUtils;
 import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.arellomobile.android.push.utils.WorkerTask;
 import com.google.android.gcm.GCMRegistrar;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

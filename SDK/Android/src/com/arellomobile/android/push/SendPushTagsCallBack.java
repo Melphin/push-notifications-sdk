@@ -1,4 +1,4 @@
-package com.arellomobile.android.push.tags;
+package com.arellomobile.android.push;
 
 import com.arellomobile.android.push.exception.PushWooshException;
 

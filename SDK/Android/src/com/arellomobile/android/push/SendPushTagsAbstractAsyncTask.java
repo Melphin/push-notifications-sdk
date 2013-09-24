@@ -1,8 +1,8 @@
-package com.arellomobile.android.push.tags;
+package com.arellomobile.android.push;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import com.arellomobile.android.push.PushManager;
+
 import com.arellomobile.android.push.exception.PushWooshException;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author MiG35
  */
-public abstract class SendPushTagsAbstractAsyncTask extends AsyncTask<Map<String, Object>, Void, Map<String, String>>
+abstract class SendPushTagsAbstractAsyncTask extends AsyncTask<Map<String, Object>, Void, Map<String, String>>
 		implements SendPushTagsCallBack
 {
 	private Context mContext;
