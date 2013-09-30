@@ -133,9 +133,11 @@
 	UIDevice *device = [UIDevice currentDevice];
 	
 	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.1")) {
-		if ([device respondsToSelector:@selector(identifierForVendor)] && [NSUUID class]) {
-			NSUUID *uuid = [device identifierForVendor];
-			return [uuid UUIDString];
+		if ([device respondsToSelector:@selector(identifierForVendor)]) {
+			NSString *uuidString = [[UIDevice currentDevice].identifierForVendor UUIDString];
+			if (uuidString) {
+				return uuidString;
+			}
 		}
 	}
 	
