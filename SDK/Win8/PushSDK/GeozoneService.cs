@@ -18,7 +18,18 @@ namespace PushSDK
         private const int MovementThreshold = 100;
         private readonly TimeSpan _minSendTime = TimeSpan.FromMinutes(10);
 
-        private readonly Geolocator _watcher = new Geolocator();
+        private Geolocator _watcher;
+        private Geolocator LazyWatcher
+        {
+            get 
+            {
+                if (_watcher == null)
+                {
+                    _watcher = new Geolocator();
+                }
+                return _watcher;
+            }
+        }
 
         private readonly GeozoneRequest _geozoneRequest = new GeozoneRequest();
 
@@ -30,20 +41,20 @@ namespace PushSDK
         {
             _geozoneRequest.AppId = appId;
 
-            _watcher.MovementThreshold = MovementThreshold;
-            _watcher.PositionChanged += WatcherOnPositionChanged;
+            LazyWatcher.MovementThreshold = MovementThreshold;
+            LazyWatcher.PositionChanged += WatcherOnPositionChanged;
         }
 
 
         public async void Start()
         {
-             _watcher.PositionChanged += WatcherOnPositionChanged;
-            await _watcher.GetGeopositionAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+             LazyWatcher.PositionChanged += WatcherOnPositionChanged;
+            await LazyWatcher.GetGeopositionAsync(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
         }
 
         public void Stop()
         {
-               _watcher.PositionChanged -= WatcherOnPositionChanged;   
+               LazyWatcher.PositionChanged -= WatcherOnPositionChanged;   
         }
 
 
@@ -86,7 +97,7 @@ namespace PushSDK
                         {
                             double dist = jRoot["response"].Value<double>("distance");
                             if (dist > 0)
-                                _watcher.MovementThreshold = dist / 2;
+                                LazyWatcher.MovementThreshold = dist / 2;
                         }
                         else
                             errorMessage = JsonHelpers.GetStatusMessage(jRoot);

@@ -14,8 +14,20 @@ namespace PushSDK
         private const int MovementThreshold = 100;
         private readonly TimeSpan _minSendTime = TimeSpan.FromMinutes(10);
 
-        private readonly GeoCoordinateWatcher _watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.Default);
-
+        private GeoCoordinateWatcher _watcher;
+        private GeoCoordinateWatcher LazyWatcher
+        {
+            get 
+            {
+                if (_watcher == null)
+                {
+                    _watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.Default);
+                    _watcher.MovementThreshold = MovementThreshold;
+                    _watcher.PositionChanged += WatcherOnPositionChanged;
+                }
+                return _watcher;
+            }
+        }
         private readonly GeozoneRequest _geozoneRequest = new GeozoneRequest();
 
         private TimeSpan _lastTimeSend;
@@ -23,19 +35,16 @@ namespace PushSDK
         public GeozoneService(string appId)
         {
             _geozoneRequest.AppId = appId;
-
-            _watcher.MovementThreshold = MovementThreshold;
-            _watcher.PositionChanged += WatcherOnPositionChanged;
         }
 
         public void Start()
         {
-            _watcher.Start();
+            LazyWatcher.Start();
         }
 
         public void Stop()
         {
-            _watcher.Stop();
+            LazyWatcher.Stop();
         }
 
         private void WatcherOnPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
@@ -56,7 +65,7 @@ namespace PushSDK
                                                                {
                                                                    double dist = jRoot["response"].Value<double>("distance");
                                                                    if (dist > 0)
-                                                                       _watcher.MovementThreshold = dist/2;
+                                                                       LazyWatcher.MovementThreshold = dist/2;
                                                                }
                                                            }
 
