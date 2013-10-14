@@ -41,7 +41,7 @@
 
 @implementation PushNotificationManager
 
-@synthesize appCode, appName, richPushWindow, pushNotifications, delegate;
+@synthesize appCode, appName, richPushWindow, pushNotifications, delegate, locationTracker;
 @synthesize supportedOrientations, showPushnotificationAlert;
 
 - (NSString *) stringFromMD5: (NSString *)val{
@@ -108,7 +108,7 @@
     ifm = (struct if_msghdr *)buf;
     sdl = (struct sockaddr_dl *)(ifm + 1);
     ptr = (unsigned char *)LLADDR(sdl);
-    NSString *outstring = [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X", 
+    NSString *outstring = [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X",
                            *ptr, *(ptr+1), *(ptr+2), *(ptr+3), *(ptr+4), *(ptr+5)];
     free(buf);
     
@@ -126,19 +126,17 @@
 	// IMPORTANT: iOS 6.0 has a bug when advertisingIdentifier or identifierForVendor occasionally might be empty! We have to fallback to hashed mac address here.
 	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.1")) {
 		// >= iOS6 return advertisingIdentifier or identifierForVendor
-		if ([NSUUID class]) {
-			if ([ASIdentifierManager class]) {
-				NSString *uuidString = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
-				if (uuidString) {
-					return uuidString;
-				}
+		if ([ASIdentifierManager class]) {
+			NSString *uuidString = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
+			if (uuidString) {
+				return uuidString;
 			}
-			
-			if ([[UIDevice currentDevice] respondsToSelector:@selector(identifierForVendor)]) {
-				NSString *uuidString = [[UIDevice currentDevice].identifierForVendor UUIDString];
-				if (uuidString) {
-					return uuidString;
-				}
+		}
+		
+		if ([[UIDevice currentDevice] respondsToSelector:@selector(identifierForVendor)]) {
+			NSString *uuidString = [[UIDevice currentDevice].identifierForVendor UUIDString];
+			if (uuidString) {
+				return uuidString;
 			}
 		}
 	}
@@ -167,7 +165,18 @@ static PushNotificationManager * instance = nil;
 		
 		internalIndex = 0;
 		pushNotifications = [[NSMutableDictionary alloc] init];
-		showPushnotificationAlert = TRUE;
+		showPushnotificationAlert = YES;
+
+		NSObject * showAlertObj = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_SHOW_ALERT"];
+		if(showAlertObj)
+		{
+			showPushnotificationAlert = [showAlertObj boolValue];
+			NSLog(@"Will show push notifications alert: %d", showPushnotificationAlert);
+		}
+		else
+		{
+			NSLog(@"Will show push notifications alert");
+		}
 		
 		[[NSUserDefaults standardUserDefaults] setObject:_appCode forKey:@"Pushwoosh_APPID"];
 		if(_appName) {
@@ -275,7 +284,7 @@ static PushNotificationManager * instance = nil;
 		
 		if(!appname)
 			appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
-			
+		
 		if(!appname) {
 			appname = @"";
 		}
@@ -332,11 +341,12 @@ static PushNotificationManager * instance = nil;
 }
 
 - (void) sendDevTokenToServer:(NSString *)deviceID {
+
 	@autoreleasepool {
 		NSString * appLocale = @"en";
 		NSLocale * locale = (NSLocale *)CFBridgingRelease(CFLocaleCopyCurrent());
 		NSString * localeId = [locale localeIdentifier];
-		
+	
 		if([localeId length] > 2)
 			localeId = [localeId stringByReplacingCharactersInRange:NSMakeRange(2, [localeId length]-2) withString:@""];
 		
@@ -346,7 +356,7 @@ static PushNotificationManager * instance = nil;
 		if([languagesArr count] > 0)
 		{
 			NSString * value = [languagesArr objectAtIndex:0];
-			
+		
 			if([value length] > 2)
 				value = [value stringByReplacingCharactersInRange:NSMakeRange(2, [value length]-2) withString:@""];
 			
@@ -359,7 +369,7 @@ static PushNotificationManager * instance = nil;
 		request.pushToken = deviceID;
 		request.language = appLocale;
 		request.timeZone = [NSString stringWithFormat:@"%d", [[NSTimeZone localTimeZone] secondsFromGMT]];
-		
+	
 		NSError *error = nil;
 		if ([[PWRequestManager sharedManager] sendRequest:request error:&error]) {
 			NSLog(@"Registered for push notifications: %@", deviceID);
@@ -467,7 +477,7 @@ static PushNotificationManager * instance = nil;
 		[self showCustomPushPage:customHtmlPageId];
 	}
     
-	NSString *linkUrl = [lastPushDict objectForKey:@"l"];	
+	NSString *linkUrl = [lastPushDict objectForKey:@"l"];
 	if(linkUrl) {
 		[self openUrl:[NSURL URLWithString:linkUrl]];
 	}
@@ -476,9 +486,9 @@ static PushNotificationManager * instance = nil;
 		[delegate onPushAccepted:self withNotification:lastPushDict];
 	}
 	else
-	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification: onStart:)] ) {
-		[delegate onPushAccepted:self withNotification:lastPushDict onStart:NO];
-	}
+		if([delegate respondsToSelector:@selector(onPushAccepted: withNotification: onStart:)] ) {
+			[delegate onPushAccepted:self withNotification:lastPushDict onStart:NO];
+		}
 	
 	[pushNotifications removeObjectForKey:[NSNumber numberWithInt:alertView.tag]];
 }
@@ -549,10 +559,10 @@ static PushNotificationManager * instance = nil;
 		[delegate onPushAccepted:self withNotification:userInfo];
 	}
 	else
-	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification: onStart:)] ) {
-		[delegate onPushAccepted:self withNotification:userInfo onStart:isPushOnStart];
-	}
-
+		if([delegate respondsToSelector:@selector(onPushAccepted: withNotification: onStart:)] ) {
+			[delegate onPushAccepted:self withNotification:userInfo onStart:isPushOnStart];
+		}
+	
 	return YES;
 }
 
@@ -565,12 +575,13 @@ static PushNotificationManager * instance = nil;
 }
 
 - (void) sendStatsBackground:(NSString *)hash {
+
 	@autoreleasepool {
 		PWPushStatRequest *request = [[PWPushStatRequest alloc] init];
 		request.appId = appCode;
 		request.hash = hash;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
-		
+	
 		if ([[PWRequestManager sharedManager] sendRequest:request]) {
 			NSLog(@"sendStats completed");
 		} else {
@@ -580,12 +591,14 @@ static PushNotificationManager * instance = nil;
 }
 
 - (void) sendTagsBackground: (NSDictionary *) tags {
+
 	@autoreleasepool {
+
 		PWSetTagsRequest *request = [[PWSetTagsRequest alloc] init];
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
 		request.tags = tags;
-		
+	
 		if ([[PWRequestManager sharedManager] sendRequest:request]) {
 			NSLog(@"setTags completed");
 		} else {
@@ -595,14 +608,15 @@ static PushNotificationManager * instance = nil;
 }
 
 - (void) sendLocationBackground: (CLLocation *) location {
+
 	@autoreleasepool {
 		NSLog(@"Sending location: %@", location);
-		
+	
 		PWGetNearestZoneRequest *request = [[PWGetNearestZoneRequest alloc] init];
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
 		request.coordinate = location.coordinate;
-		
+	
 		if ([[PWRequestManager sharedManager] sendRequest:request]) {
 			NSLog(@"getNearestZone completed");
 		} else {
@@ -620,6 +634,7 @@ static PushNotificationManager * instance = nil;
 - (void) sendAppOpenBackground {
 	//it's ok to call this method without push token
 	@autoreleasepool {
+	
 		PWAppOpenRequest *request = [[PWAppOpenRequest alloc] init];
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
@@ -635,8 +650,9 @@ static PushNotificationManager * instance = nil;
 - (void) sendBadgesBackground: (NSNumber *) badge {
 	if([[PushNotificationManager pushManager] getPushToken] == nil)
 		return;
-		
+	
 	@autoreleasepool {
+
 		PWSendBadgeRequest *request = [[PWSendBadgeRequest alloc] init];
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
@@ -651,7 +667,9 @@ static PushNotificationManager * instance = nil;
 }
 
 - (void) sendGoalBackground: (PWApplicationEventRequest *) request {
+	
 	@autoreleasepool {
+		
 		if ([[PWRequestManager sharedManager] sendRequest:request]) {
 			NSLog(@"sendGoals completed");
 		} else {
