@@ -6,7 +6,6 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <StoreKit/StoreKit.h>
 #import "HtmlWebViewController.h"
 #import "PushRuntime.h"
 
@@ -144,7 +143,7 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 /**
   `PushNotificationManager` class offers access to the singletone-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
  */
-@interface PushNotificationManager : NSObject <HtmlWebViewControllerDelegate, SKPaymentTransactionObserver> {
+@interface PushNotificationManager : NSObject <HtmlWebViewControllerDelegate> {
 	NSString *appCode;
 	NSString *appName;
 
