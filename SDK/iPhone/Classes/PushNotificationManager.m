@@ -126,19 +126,17 @@
 	// IMPORTANT: iOS 6.0 has a bug when advertisingIdentifier or identifierForVendor occasionally might be empty! We have to fallback to hashed mac address here.
 	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"6.1")) {
 		// >= iOS6 return advertisingIdentifier or identifierForVendor
-		if ([NSUUID class]) {
-			if ([ASIdentifierManager class]) {
-				NSString *uuidString = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
-				if (uuidString) {
-					return uuidString;
-				}
+		if ([ASIdentifierManager class]) {
+			NSString *uuidString = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
+			if (uuidString) {
+				return uuidString;
 			}
-			
-			if ([[UIDevice currentDevice] respondsToSelector:@selector(identifierForVendor)]) {
-				NSString *uuidString = [[UIDevice currentDevice].identifierForVendor UUIDString];
-				if (uuidString) {
-					return uuidString;
-				}
+		}
+		
+		if ([[UIDevice currentDevice] respondsToSelector:@selector(identifierForVendor)]) {
+			NSString *uuidString = [[UIDevice currentDevice].identifierForVendor UUIDString];
+			if (uuidString) {
+				return uuidString;
 			}
 		}
 	}
@@ -167,7 +165,18 @@ static PushNotificationManager * instance = nil;
 		
 		internalIndex = 0;
 		pushNotifications = [[NSMutableDictionary alloc] init];
-		showPushnotificationAlert = TRUE;
+		showPushnotificationAlert = YES;
+
+		NSObject * showAlertObj = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_SHOW_ALERT"];
+		if(showAlertObj)
+		{
+			showPushnotificationAlert = [showAlertObj boolValue];
+			NSLog(@"Will show push notifications alert: %d", showPushnotificationAlert);
+		}
+		else
+		{
+			NSLog(@"Will show push notifications alert");
+		}
 		
 		[[NSUserDefaults standardUserDefaults] setObject:_appCode forKey:@"Pushwoosh_APPID"];
 		if(_appName) {

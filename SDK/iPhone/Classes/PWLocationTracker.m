@@ -21,6 +21,8 @@ static NSTimeInterval const kMinUpdateTime = 10.f;
 
 @implementation PWLocationTracker
 
+@synthesize locationManager, enabled, backgroundMode, locationUpdatedInForeground, locationUpdatedInBackground;
+
 #pragma mark - NSObject
 
 - (id)init {
@@ -111,7 +113,8 @@ static NSTimeInterval const kMinUpdateTime = 10.f;
         if (self.locationUpdatedInBackground) {
 			dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
 			dispatch_async(queue, ^{
-				UIBackgroundTaskIdentifier __block bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler: ^{
+				UIBackgroundTaskIdentifier __block bgTask;
+				bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler: ^{
 					[[UIApplication sharedApplication] endBackgroundTask:bgTask];
 					bgTask = UIBackgroundTaskInvalid;
 				}];
